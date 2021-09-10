@@ -1,0 +1,27 @@
+---
+
+- name: Enable IOMMU on GRUB
+  ansible.builtin.template:
+    src: grub.j2
+    dest: /etc/default/grub
+    backup: true
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify:
+    - update-grub
+    - Reboot Host
+
+- name: Load IOMMU kernel modules
+  ansible.builtin.copy:
+    src: ../static/etc/modules
+    dest: /etc/modules
+    backup: true
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify:
+    - update-initramfs
+    - Reboot Host

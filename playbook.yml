@@ -1,0 +1,14 @@
+---
+
+# Quick-provisioning playbook
+# ---------------------------
+
+# A Simple, straight playbook for quick remote installations.
+# You will be asked which hosts to provision before-hand.
+
+
+- name: gringolito.proxmox_ve
+  hosts: all
+  user: root
+  roles:
+    - '.'    # The current directory itself is the role
