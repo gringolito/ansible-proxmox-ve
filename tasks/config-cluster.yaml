@@ -1,0 +1,28 @@
+---
+- name: Verify if cluster exists
+  ansible.builtin.command: /usr/bin/pvecm status
+  register: pve_cluster_status
+  check_mode: no
+  changed_when: false
+  ignore_errors: true
+  become: true
+  when: pve__cluster_master is defined
+
+- name: Create Proxmox cluster
+  ansible.builtin.command: /usr/bin/pvecm create {{ pve__cluster_master }}
+  become: true
+  when: pve__cluster_master is defined and pve__cluster_master not in pve_cluster_status.stdout
+
+- name: Verify cluster membership
+  ansible.builtin.command: /usr/bin/pvecm nodes
+  register: pve_cluster_nodes
+  check_mode: no
+  changed_when: false
+  ignore_errors: true
+  become: true
+  when: pve__cluster_join is defined
+
+- name: Add Proxmox nodes to the cluster
+  ansible.builtin.command: /usr/bin/pvecm add {{ pve__cluster_join }} --use_ssh
+  become: true
+  when: pve__cluster_join is defined and pve__cluster_node not in pve_cluster_nodes.stdout

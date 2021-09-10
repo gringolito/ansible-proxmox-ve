@@ -1,0 +1,34 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+{% for interface in pve__network_interfaces %}
+iface {{ interface }} inet manual
+
+{% endfor %}
+{% for bridge in pve__network_bridges %}
+auto {{ bridge.name }}
+{% if bridge.address is defined %}
+iface {{ bridge.name }} inet static
+  address {{ bridge.address }}
+{% if bridge.gateway is defined %}
+  gateway {{ bridge.gateway }}
+{% endif %}
+{% else %}
+iface {{ bridge.name }} inet manual
+{% endif %}
+  bridge_ports {{ bridge.interfaces }}
+  bridge_stp off
+  bridge_fd 0
+{% if bridge.vlans is defined %}
+  bridge-vlan-aware yes
+  bridge-vids {{ bridge.vlans }}
+{% endif %}
+{% if bridge.description is defined %}
+#{{ bridge.description }}
+{% endif %}
+
+{% endfor %}

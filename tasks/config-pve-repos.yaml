@@ -1,0 +1,34 @@
+---
+- name: Register repository signing key
+  ansible.builtin.apt_key:
+    url: "{{ pve__apt_repo_key[ansible_distribution_release] }}"
+  become: true
+
+- name: Remove well known repo files
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/{{ item }}
+    state: absent
+  with_items:
+    - "{{ pve__apt_repo_todel }}"
+  become: true
+
+- name: Add no-subscription repository
+  ansible.builtin.apt_repository:
+    repo: "{{ pve__apt_repo_pve_no_subscription }}"
+    state: present
+    update_cache: true
+    filename: pve-no-subscription
+  become: true
+  when:
+    - not pve__enterprise
+
+- name: Add enterprise repository
+  ansible.builtin.apt_repository:
+    repo: "{{ pve__apt_repo_pve_enterprise }}"
+    state: present
+    update_cache: true
+    filename: pve-enterprise
+  become: true
+  when:
+    - pve__enterprise
+

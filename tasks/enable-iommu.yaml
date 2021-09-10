@@ -1,0 +1,28 @@
+---
+- name: Enable IOMMU on kernel boot command line
+  ansible.builtin.template:
+    src: grub.j2
+    dest: /etc/default/grub
+    backup: true
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify:
+    - Update grub
+    - Reboot host
+
+- name: Load IOMMU kernel modules
+  ansible.builtin.lineinfile:
+    path: /etc/modules
+    line: "{{ item }}"
+    state: present
+  become: true
+  with_items:
+    - vfio
+    - vfio_iommu_type1
+    - vfio_pci
+    - vfio_virqfd
+  notify:
+    - Update initramfs
+    - Reboot host
