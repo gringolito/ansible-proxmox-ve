@@ -1,8 +1,20 @@
 ---
 
-- name: Install VIM
+- name: Install basic packages
   ansible.builtin.apt:
-    package: vim
+    package:
+      - vim
+      - build-essential
     state: present
     update_cache: yes
   become: true
+
+- name: Install extra paravirtualized packages
+  ansible.builtin.apt:
+    package:
+      - dkms
+      - libelf-dev
+    state: present
+    update_cache: yes
+  become: true
+  when: pve__need_dkms

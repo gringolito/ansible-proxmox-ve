@@ -9,5 +9,5 @@
     group: root
     mode: 0644
   become: true
-  # notify: Reboot Host
+  notify: Reboot Host
 # check network configuration template

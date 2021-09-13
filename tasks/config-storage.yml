@@ -1,0 +1,25 @@
+---
+
+- name: Verify if storage exists
+  ansible.builtin.command: /usr/sbin/pvesm status
+  register: pve_storage_list
+  check_mode: no
+  changed_when: false
+  become: true
+
+- name: Add CIFS mounts
+  ansible.builtin.command: /usr/sbin/pvesm add cifs {{ item.name }}
+    -server {{ item.server }}
+    -share {{ item.share }}
+    -username {{ item.username }}
+    -password {{ item.password }}
+  loop: "{{ pve__cifs_mounts }}"
+  become: true
+  when: pve__cifs_mounts is defined and item.name not in pve_storage_list.stdout
+
+
+- name: Add ZFS pools
+  ansible.builtin.command: /usr/sbin/pvesm add zfspool {{ item.name }} -pool {{ item.pool }}
+  loop: "{{ pve__zfs_pools }}"
+  become: true
+  when: pve__zfs_pools is defined and item.name not in pve_storage_list.stdout
