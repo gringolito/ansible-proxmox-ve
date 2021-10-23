@@ -1,0 +1,8 @@
+---
+# defaults file for pve
+
+pve__force_reboot: false
+pve__enterprise: false
+pve__need_dkms: false
+pve__admin_group: Administrators
+pve__admin_user: gringolito@pve

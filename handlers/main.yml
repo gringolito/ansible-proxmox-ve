@@ -1,0 +1,12 @@
+---
+# handlers file for pve
+
+- name: update-grub
+  ansible.builtin.command: update-grub
+
+- name: update-initramfs
+  ansible.builtin.command: update-initramfs -u -k all
+
+- name: Reboot Host
+  ansible.builtin.reboot:
+    pre_reboot_delay: 1

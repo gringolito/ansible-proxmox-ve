@@ -1,0 +1,19 @@
+# Created by https://www.toptal.com/developers/gitignore/api/ansible,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=ansible,visualstudiocode
+
+### Ansible ###
+*.retry
+
+### VisualStudioCode ###
+.vscode/*
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
+# End of https://www.toptal.com/developers/gitignore/api/ansible,visualstudiocode
