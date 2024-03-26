@@ -1,0 +1,38 @@
+---
+- name: Check system OS
+  ansible.builtin.fail:
+    msg: "This is not a Debian based distribution. Proxmox VE is not compatible"
+  when: ansible_distribution != "Debian"
+
+- name: Configure networking
+  ansible.builtin.include_tasks: config-network.yaml
+  when: pve__network_interfaces is defined and pve__network_bridges is defined
+
+- name: Configure IOMMU
+  ansible.builtin.include_tasks: enable-iommu.yaml
+  when: pve__iommu_arch is defined
+
+- name: Configure Proxmox VE repositories and packages
+  ansible.builtin.include_tasks: config-pve-repos.yaml
+
+- name: Configure PVE Users and Groups
+  ansible.builtin.include_tasks: config-users.yaml
+
+- name: Configure PVE Storage
+  ansible.builtin.include_tasks: config-storage.yaml
+
+- name: Configure PVE Cluster
+  ansible.builtin.include_tasks: config-cluster.yaml
+
+- name: Install Proxmox VE kernel headers
+  ansible.builtin.apt:
+    package: pve-headers
+    state: present
+    update_cache: true
+  become: true
+
+- name: Force host reboot
+  ansible.builtin.debug:
+    msg: "pve__force_reboot was set to true. Rebooting the host"
+  notify: Reboot host
+  when: pve__force_reboot

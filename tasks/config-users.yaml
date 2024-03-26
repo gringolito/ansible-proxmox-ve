@@ -1,0 +1,43 @@
+---
+- name: Check if administrator pve group exists
+  ansible.builtin.command: /usr/sbin/pveum group list
+  register: pve_group_list
+  check_mode: no
+  changed_when: false
+  become: true
+
+- name: Create administrator pve group
+  ansible.builtin.command: /usr/sbin/pveum group add {{ pve__admin_group }}
+  become: true
+  when: pve__admin_group not in pve_group_list.stdout
+
+- name: Assign "Administrator" role to administrator group
+  ansible.builtin.command: /usr/sbin/pveum acl modify / --group {{ pve__admin_group }} --roles Administrator
+  become: true
+  when: pve__admin_group not in pve_group_list.stdout
+
+- name: Create auditor pve group
+  ansible.builtin.command: /usr/sbin/pveum group add {{ pve__audit_group }}
+  become: true
+  when: pve__audit_group not in pve_group_list.stdout
+
+- name: Assign "PVEAuditor" role to auditor group
+  ansible.builtin.command: /usr/sbin/pveum acl modify / --group {{ pve__audit_group }} --roles PVEAuditor
+  become: true
+  when: pve__audit_group not in pve_group_list.stdout
+
+- name: Check if the administrator pve user exist
+  ansible.builtin.command: /usr/sbin/pveum user list
+  register: pve_user_list
+  check_mode: no
+  changed_when: false
+  become: true
+
+- name: Create the administrator pve user and assign to the administrator group
+  ansible.builtin.command: /usr/sbin/pveum user add {{ pve__admin_user }} -password {{ pve__admin_password }} -groups {{ pve__admin_group }}
+  become: true
+  when: pve__admin_password is defined and pve__admin_user not in pve_user_list.stdout
+
+- name: Create the auditor pve user and assign to the auditor group
+  ansible.builtin.command: /usr/sbin/pveum user add {{ pve__audit_user }} -password {{ pve__audit_password }} -groups {{ pve__audit_group }}
+  when: pve__audit_password is defined and pve__audit_user not in pve_user_list.stdout
