@@ -26,3 +26,11 @@
   notify:
     - Update initramfs
     - Reboot host
+
+- name: Enable VirtIO-GL support
+  ansible.builtin.apt:
+    package:
+      - libgl1
+      - libegl1
+    state: present
+  become: true
