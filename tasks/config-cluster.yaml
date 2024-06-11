@@ -42,3 +42,18 @@
       ansible.builtin.command: /usr/bin/pvecm add {{ pve__cluster_join }} --link0 {{ pve__cluster_link }} --use_ssh
       when: pve__cluster_link is defined
 
+- name: Configure HA shutdown policy
+  ansible.builtin.lineinfile:
+    path: /etc/pve/datacenter.cfg
+    regexp: "^ha:"
+    line: "ha: shutdown_policy={{ pve__cluster_ha_shutdown_policy }}"
+    state: present
+  when: pve__cluster_ha_shutdown_policy is defined
+
+- name: Configure migration network
+  ansible.builtin.lineinfile:
+    path: /etc/pve/datacenter.cfg
+    regexp: "^migration:"
+    line: "migration: network={{ pve__cluster_migration_network }},type=secure"
+    state: present
+  when: pve__cluster_migration_network is defined

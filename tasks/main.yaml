@@ -31,6 +31,14 @@
     update_cache: true
   become: true
 
+- name: Configure datacenter tag order
+  ansible.builtin.lineinfile:
+    path: /etc/pve/datacenter.cfg
+    regexp: "^tag-style:"
+    line: "tag-style: case-sensitive=1,ordering={{ pve__datacenter_tag_style_order }}"
+    state: present
+  when: pve__datacenter_tag_style_order is defined
+
 - name: Force host reboot
   ansible.builtin.debug:
     msg: "pve__force_reboot was set to true. Rebooting the host"
