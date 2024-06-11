@@ -16,3 +16,8 @@
   with_items:
     - iscsid
     - open-iscsi
+
+- name: Restart network interfaces
+  ansible.builtin.systemd_service:
+    name: networking
+    state: restarted
