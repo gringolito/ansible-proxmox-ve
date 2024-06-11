@@ -9,20 +9,36 @@
   when: pve__cluster_master is defined
 
 - name: Create Proxmox cluster
-  ansible.builtin.command: /usr/bin/pvecm create {{ pve__cluster_master }}
   become: true
   when: pve__cluster_master is defined and pve__cluster_master not in pve_cluster_status.stdout
+  block:
+    - name: Create cluster (auto link discover)
+      ansible.builtin.command: /usr/bin/pvecm create {{ pve__cluster_master }}
+      when: pve__cluster_link is not defined
+
+    - name: Create cluster (manual link0)
+      ansible.builtin.command: /usr/bin/pvecm create {{ pve__cluster_master }} --link0 {{ pve__cluster_link }}
+      when: pve__cluster_link is defined
 
 - name: Verify cluster membership
   ansible.builtin.command: /usr/bin/pvecm nodes
   register: pve_cluster_nodes
+  failed_when: pve_cluster_nodes.rc != 0 and pve_cluster_nodes.rc != 2
   check_mode: no
   changed_when: false
   ignore_errors: true
   become: true
   when: pve__cluster_join is defined
 
-- name: Add Proxmox nodes to the cluster
-  ansible.builtin.command: /usr/bin/pvecm add {{ pve__cluster_join }} --use_ssh
+- name: Add Proxmox node to the cluster
   become: true
-  when: pve__cluster_join is defined and pve__cluster_node not in pve_cluster_nodes.stdout
+  when: pve__cluster_join is defined and (pve_cluster_nodes.rc == 2 or pve__cluster_node not in pve_cluster_nodes.stdout)
+  block:
+    - name: Add node using (auto link discover)
+      ansible.builtin.command: /usr/bin/pvecm add {{ pve__cluster_join }} --use_ssh
+      when: pve__cluster_link is not defined
+
+    - name: Add node to the cluster (manual link0)
+      ansible.builtin.command: /usr/bin/pvecm add {{ pve__cluster_join }} --link0 {{ pve__cluster_link }} --use_ssh
+      when: pve__cluster_link is defined
+
