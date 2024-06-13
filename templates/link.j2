@@ -1,7 +1,8 @@
 [Match]
 {% if item.mac_address is defined %}
 MACAddress={{ item.mac_address }}
-{% elif item.driver is defined %}
+{% endif %}
+{% if item.driver is defined %}
 Driver={{ item.driver }}
 {% endif %}
 

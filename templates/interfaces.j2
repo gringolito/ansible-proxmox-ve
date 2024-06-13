@@ -7,16 +7,14 @@ iface lo inet loopback
 
 {% for interface in pve_network_interfaces %}
 {% if interface is string %}
+auto {{ interface }}
 iface {{ interface }} inet manual
 {% else %}
-{% if interface.auto is defined and interface.auto %}
 auto {{ interface.name }}
-{% endif %}
 {% if interface.allow is defined %}
 allow-{{ interface.allow }} {{ interface.name }}
 {% endif %}
 {% if interface.address is defined %}
-auto {{ interface.name }}
 iface {{ interface.name }} inet static
   address {{ interface.address }}
 {% if interface.gateway is defined %}
@@ -42,7 +40,11 @@ iface {{ bridge.name }} inet static
 {% else %}
 iface {{ bridge.name }} inet manual
 {% endif %}
+{% if bridge.interfaces is list %}
+  bridge_ports {{ " ".joing(bridge.interfaces) }}
+{% else %}
   bridge_ports {{ bridge.interfaces }}
+{% endif %}
   bridge_stp off
   bridge_fd 0
 {% if bridge.vlans is defined %}

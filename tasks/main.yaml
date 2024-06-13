@@ -15,14 +15,14 @@
 - name: Configure Proxmox VE repositories and packages
   ansible.builtin.include_tasks: config-pve-repos.yaml
 
+- name: Configure PVE Cluster
+  ansible.builtin.include_tasks: config-cluster.yaml
+
 - name: Configure PVE Users and Groups
   ansible.builtin.include_tasks: config-users.yaml
 
 - name: Configure PVE Storage
   ansible.builtin.include_tasks: config-storage.yaml
-
-- name: Configure PVE Cluster
-  ansible.builtin.include_tasks: config-cluster.yaml
 
 - name: Install Proxmox VE kernel headers
   ansible.builtin.apt:

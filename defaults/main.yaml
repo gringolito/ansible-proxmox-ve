@@ -2,7 +2,9 @@
 pve_force_reboot: false
 pve_enterprise: false
 pve_iommu_passthrough: false
+pve_iommu_intel: false
 pve_admin_group: Administrators
 pve_admin_user: admin@pve
 pve_audit_group: Auditors
 pve_audit_user: audit@pve
+pve_cluster_hostname: "{{ ansible_hostname }}"
