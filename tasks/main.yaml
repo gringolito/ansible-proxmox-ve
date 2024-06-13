@@ -6,11 +6,11 @@
 
 - name: Configure networking
   ansible.builtin.include_tasks: config-network.yaml
-  when: pve__network_interfaces is defined and pve__network_bridges is defined
+  when: pve_network_interfaces is defined and pve_network_bridges is defined
 
 - name: Configure IOMMU
   ansible.builtin.include_tasks: enable-iommu.yaml
-  when: pve__iommu_arch is defined
+  when: pve_iommu_arch is defined
 
 - name: Configure Proxmox VE repositories and packages
   ansible.builtin.include_tasks: config-pve-repos.yaml
@@ -35,12 +35,12 @@
   ansible.builtin.lineinfile:
     path: /etc/pve/datacenter.cfg
     regexp: "^tag-style:"
-    line: "tag-style: case-sensitive=1,ordering={{ pve__datacenter_tag_style_order }}"
+    line: "tag-style: case-sensitive=1,ordering={{ pve_datacenter_tag_style_order }}"
     state: present
-  when: pve__datacenter_tag_style_order is defined
+  when: pve_datacenter_tag_style_order is defined
 
 - name: Force host reboot
   ansible.builtin.debug:
-    msg: "pve__force_reboot was set to true. Rebooting the host"
+    msg: "pve_force_reboot was set to true. Rebooting the host"
   notify: Reboot host
-  when: pve__force_reboot
+  when: pve_force_reboot
