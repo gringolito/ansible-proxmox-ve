@@ -6,7 +6,7 @@
   changed_when: false
   become: true
 
-- name: Add SMB shares
+- name: Add CIFS/SMB shares
   ansible.builtin.command: /usr/sbin/pvesm add cifs {{ item.name }}
     --server {{ item.server }}
     --share {{ item.share }}
@@ -56,6 +56,9 @@
   when: pve_iscsi_targets is defined
 
 - name: Set-up iSCSI authentication
+  become: true
+  notify: Restart iSCSI
+  when: pve_iscsi_authentication is defined
   block:
     - name: Configure iSCSI discovery authentication method
       ansible.builtin.lineinfile:
@@ -138,9 +141,6 @@
         line: node.session.auth.password_in = {{ pve_iscsi_authentication.password_in }}
         insertafter: "#node.session.auth.password_in"
         state: present
-  become: true
-  notify: Restart iSCSI
-  when: pve__iscsi_authentication is defined
 
 - name: Add iSCSI mounts
   ansible.builtin.command: /usr/sbin/pvesm add iscsi {{ item.name }}
@@ -159,7 +159,9 @@
   when: pve_zfs_pools is defined and item.name not in pve__storage_status.stdout
 
 - name: Add ZFS pools
-  ansible.builtin.command: /usr/sbin/pvesm add zfspool {{ item.name }} -pool {{ item.pool }}
+  ansible.builtin.command: /usr/sbin/pvesm add zfspool {{ item.name }}
+    --pool {{ item.pool }}
+    --content {{ item.content | default("images") }}
   with_items: "{{ pve_zfs_pools }}"
   become: true
   when: pve_zfs_pools is defined and item.name not in pve__storage_status.stdout
@@ -168,7 +170,6 @@
   ansible.builtin.command: /usr/sbin/pvesm add lvm {{ item.name }}
     --vgname {{ item.vgname }}
     --content {{ item.content | default("images") }}
-    --nodes {{ item.nodes | default("all") }}
   with_items: "{{ pve_lvm_mounts }}"
   become: true
   when: pve_lvm_mounts is defined and item.name not in pve__storage_status.stdout

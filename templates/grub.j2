@@ -6,7 +6,7 @@
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=2
 GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
-GRUB_CMDLINE_LINUX_DEFAULT="quiet {{ pve_iommu_arch }}_iommu=on {% if pve_iommu_passthrough %}iommu=pt{% endif %}"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet{% if pve_iommu_intel %} intel_iommu=on{% endif %}{% if pve_iommu_passthrough %} iommu=pt{% endif %}"
 GRUB_CMDLINE_LINUX=""
 
 # Uncomment to enable BadRAM filtering, modify to suit your needs

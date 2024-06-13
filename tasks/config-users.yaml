@@ -40,4 +40,5 @@
 
 - name: Create the auditor PVE user and assign to the Auditors group
   ansible.builtin.command: /usr/sbin/pveum user add {{ pve_audit_user }} -password {{ pve_audit_password }} -groups {{ pve_audit_group }}
+  become: true
   when: pve__audit_password is defined and pve__audit_user not in pve__user_list.stdout

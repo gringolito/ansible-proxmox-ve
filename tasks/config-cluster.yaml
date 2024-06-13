@@ -6,18 +6,18 @@
   changed_when: false
   ignore_errors: true
   become: true
-  when: pve_cluster_master is defined
+  when: pve_cluster_create is defined
 
 - name: Create Proxmox cluster
   become: true
-  when: pve_cluster_master is defined and pve_cluster_master not in pve__cluster_status.stdout
+  when: pve_cluster_create is defined and pve_cluster_create not in pve__cluster_status.stdout
   block:
     - name: Create cluster (auto link discover)
-      ansible.builtin.command: /usr/bin/pvecm create {{ pve_cluster_master }}
+      ansible.builtin.command: /usr/bin/pvecm create {{ pve_cluster_create }}
       when: pve_cluster_link is not defined
 
     - name: Create cluster (manual link0)
-      ansible.builtin.command: /usr/bin/pvecm create {{ pve_cluster_master }} --link0 {{ pve_cluster_link }}
+      ansible.builtin.command: /usr/bin/pvecm create {{ pve_cluster_create }} --link0 {{ pve_cluster_link }}
       when: pve_cluster_link is defined
 
 - name: Verify cluster membership
@@ -28,18 +28,18 @@
   changed_when: false
   ignore_errors: true
   become: true
-  when: pve_cluster_join is defined
+  when: pve_cluster_join_address is defined
 
 - name: Add Proxmox node to the cluster
   become: true
-  when: pve_cluster_join is defined and (pve__cluster_nodes.rc == 2 or pve_cluster_node not in pve__cluster_nodes.stdout)
+  when: pve_cluster_join_address is defined and (pve__cluster_nodes.rc == 2 or pve_cluster_hostname not in pve__cluster_nodes.stdout)
   block:
     - name: Add node using (auto link discover)
-      ansible.builtin.command: /usr/bin/pvecm add {{ pve_cluster_join }} --use_ssh
+      ansible.builtin.command: /usr/bin/pvecm add {{ pve_cluster_join_address }} --use_ssh
       when: pve_cluster_link is not defined
 
     - name: Add node to the cluster (manual link0)
-      ansible.builtin.command: /usr/bin/pvecm add {{ pve_cluster_join }} --link0 {{ pve_cluster_link }} --use_ssh
+      ansible.builtin.command: /usr/bin/pvecm add {{ pve_cluster_join_address }} --link0 {{ pve_cluster_link }} --use_ssh
       when: pve_cluster_link is defined
 
 - name: Configure HA shutdown policy

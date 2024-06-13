@@ -9,7 +9,6 @@
     mode: 0644
   become: true
   notify: Restart network interfaces
-# check network configuration template
 
 - name: Configure network interface names
   ansible.builtin.template:
@@ -23,4 +22,3 @@
   when: pve_network_interface_alias is defined
   become: true
   notify: Reboot host
-# check interface name template
