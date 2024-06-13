@@ -3,7 +3,6 @@ galaxy_info:
   description: Configure a Proxmox VE server or cluster
   namespace: gringolito
   role_name: proxmox_ve
-  standalone: true
   license: Beerware
   min_ansible_version: "2.14"
 
