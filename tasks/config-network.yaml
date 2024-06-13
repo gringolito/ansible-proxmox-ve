@@ -19,8 +19,8 @@
     group: root
     mode: 0644
   with_items:
-    - "{{ pve__network_interface_alias }}"
-  when: pve__network_interface_alias is defined
+    - "{{ pve_network_interface_alias }}"
+  when: pve_network_interface_alias is defined
   become: true
   notify: Reboot host
 # check interface name template

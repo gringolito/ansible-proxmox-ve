@@ -5,7 +5,7 @@
 auto lo
 iface lo inet loopback
 
-{% for interface in pve__network_interfaces %}
+{% for interface in pve_network_interfaces %}
 {% if interface is string %}
 iface {{ interface }} inet manual
 {% else %}
@@ -31,7 +31,7 @@ iface {{ interface.name }} inet manual
 {% endif %}
 
 {% endfor %}
-{% for bridge in pve__network_bridges %}
+{% for bridge in pve_network_bridges %}
 auto {{ bridge.name }}
 {% if bridge.address is defined %}
 iface {{ bridge.name }} inet static

@@ -19,8 +19,7 @@
     update_cache: true
     filename: pve-no-subscription
   become: true
-  when:
-    - not pve__enterprise
+  when: not pve_enterprise
 
 - name: Add enterprise repository
   ansible.builtin.apt_repository:
@@ -29,6 +28,4 @@
     update_cache: true
     filename: pve-enterprise
   become: true
-  when:
-    - pve__enterprise
-
+  when: pve_enterprise

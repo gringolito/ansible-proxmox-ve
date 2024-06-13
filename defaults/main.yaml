@@ -1,8 +1,8 @@
 ---
-pve__force_reboot: false
-pve__enterprise: false
-pve__iommu_passthrough: false
-pve__admin_group: Administrators
-pve__admin_user: admin@pve
-pve__audit_group: Auditors
-pve__audit_user: audit@pve
+pve_force_reboot: false
+pve_enterprise: false
+pve_iommu_passthrough: false
+pve_admin_group: Administrators
+pve_admin_user: admin@pve
+pve_audit_group: Auditors
+pve_audit_user: audit@pve

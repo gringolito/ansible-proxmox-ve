@@ -1,59 +1,59 @@
 ---
 - name: Verify if cluster exists
   ansible.builtin.command: /usr/bin/pvecm status
-  register: pve_cluster_status
+  register: pve__cluster_status
   check_mode: no
   changed_when: false
   ignore_errors: true
   become: true
-  when: pve__cluster_master is defined
+  when: pve_cluster_master is defined
 
 - name: Create Proxmox cluster
   become: true
-  when: pve__cluster_master is defined and pve__cluster_master not in pve_cluster_status.stdout
+  when: pve_cluster_master is defined and pve_cluster_master not in pve__cluster_status.stdout
   block:
     - name: Create cluster (auto link discover)
-      ansible.builtin.command: /usr/bin/pvecm create {{ pve__cluster_master }}
-      when: pve__cluster_link is not defined
+      ansible.builtin.command: /usr/bin/pvecm create {{ pve_cluster_master }}
+      when: pve_cluster_link is not defined
 
     - name: Create cluster (manual link0)
-      ansible.builtin.command: /usr/bin/pvecm create {{ pve__cluster_master }} --link0 {{ pve__cluster_link }}
-      when: pve__cluster_link is defined
+      ansible.builtin.command: /usr/bin/pvecm create {{ pve_cluster_master }} --link0 {{ pve_cluster_link }}
+      when: pve_cluster_link is defined
 
 - name: Verify cluster membership
   ansible.builtin.command: /usr/bin/pvecm nodes
-  register: pve_cluster_nodes
-  failed_when: pve_cluster_nodes.rc != 0 and pve_cluster_nodes.rc != 2
+  register: pve__cluster_nodes
+  failed_when: pve__cluster_nodes.rc != 0 and pve__cluster_nodes.rc != 2
   check_mode: no
   changed_when: false
   ignore_errors: true
   become: true
-  when: pve__cluster_join is defined
+  when: pve_cluster_join is defined
 
 - name: Add Proxmox node to the cluster
   become: true
-  when: pve__cluster_join is defined and (pve_cluster_nodes.rc == 2 or pve__cluster_node not in pve_cluster_nodes.stdout)
+  when: pve_cluster_join is defined and (pve__cluster_nodes.rc == 2 or pve_cluster_node not in pve__cluster_nodes.stdout)
   block:
     - name: Add node using (auto link discover)
-      ansible.builtin.command: /usr/bin/pvecm add {{ pve__cluster_join }} --use_ssh
-      when: pve__cluster_link is not defined
+      ansible.builtin.command: /usr/bin/pvecm add {{ pve_cluster_join }} --use_ssh
+      when: pve_cluster_link is not defined
 
     - name: Add node to the cluster (manual link0)
-      ansible.builtin.command: /usr/bin/pvecm add {{ pve__cluster_join }} --link0 {{ pve__cluster_link }} --use_ssh
-      when: pve__cluster_link is defined
+      ansible.builtin.command: /usr/bin/pvecm add {{ pve_cluster_join }} --link0 {{ pve_cluster_link }} --use_ssh
+      when: pve_cluster_link is defined
 
 - name: Configure HA shutdown policy
   ansible.builtin.lineinfile:
     path: /etc/pve/datacenter.cfg
     regexp: "^ha:"
-    line: "ha: shutdown_policy={{ pve__cluster_ha_shutdown_policy }}"
+    line: "ha: shutdown_policy={{ pve_cluster_ha_shutdown_policy }}"
     state: present
-  when: pve__cluster_ha_shutdown_policy is defined
+  when: pve_cluster_ha_shutdown_policy is defined
 
 - name: Configure migration network
   ansible.builtin.lineinfile:
     path: /etc/pve/datacenter.cfg
     regexp: "^migration:"
-    line: "migration: network={{ pve__cluster_migration_network }},type=secure"
+    line: "migration: network={{ pve_cluster_migration_network }},type=secure"
     state: present
-  when: pve__cluster_migration_network is defined
+  when: pve_cluster_migration_network is defined

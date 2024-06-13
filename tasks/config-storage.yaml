@@ -1,7 +1,7 @@
 ---
-- name: Verify if storage exists
+- name: Check for the existing storages
   ansible.builtin.command: /usr/sbin/pvesm status
-  register: pve_storage_list
+  register: pve__storage_status
   check_mode: no
   changed_when: false
   become: true
@@ -14,9 +14,9 @@
     --password {{ item.password }}
     --content {{ item.content | default("images") }}
     --shared {{ item.shared | default(true) }}
-  with_items: "{{ pve__cifs_shares }}"
+  with_items: "{{ pve_cifs_shares }}"
   become: true
-  when: pve__cifs_shares is defined and item.name not in pve_storage_list.stdout
+  when: pve_cifs_shares is defined and item.name not in pve__storage_status.stdout
 
 - name: Add NFS mounts
   ansible.builtin.command: /usr/sbin/pvesm add nfs {{ item.name }}
@@ -24,9 +24,9 @@
     --export {{ item.export }}
     --content {{ item.content | default("images") }}
     --nodes {{ item.nodes | default("all") }}
-  with_items: "{{ pve__nfs_mounts }}"
+  with_items: "{{ pve_nfs_mounts }}"
   become: true
-  when: pve__nfs_mounts is defined and item.name not in pve_storage_list.stdout
+  when: pve_nfs_mounts is defined and item.name not in pve__storage_status.stdout
 
 - name: Install iSCSI packages
   ansible.builtin.apt:
@@ -36,7 +36,7 @@
     state: present
     update_cache: true
   become: true
-  when: pve__iscsi_targets is defined
+  when: pve_iscsi_targets is defined
 
 - name: Set iSCSI to automatically start nodes
   ansible.builtin.lineinfile:
@@ -45,7 +45,7 @@
     line: node.startup = automatic
     insertafter: "# node.startup"
     state: present
-  when: pve__iscsi_targets is defined
+  when: pve_iscsi_targets is defined
 
 - name: Set lower replacement timeout for iSCSI multipath
   ansible.builtin.lineinfile:
@@ -53,7 +53,7 @@
     regexp: "^node.session.timeo.replacement_timeout"
     line: node.session.timeo.replacement_timeout = 15
     state: present
-  when: pve__iscsi_targets is defined
+  when: pve_iscsi_targets is defined
 
 - name: Set-up iSCSI authentication
   block:
@@ -69,7 +69,7 @@
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^discovery.sendtargets.auth.username ="
-        line: discovery.sendtargets.auth.username = {{ pve__iscsi_authentication.username }}
+        line: discovery.sendtargets.auth.username = {{ pve_iscsi_authentication.username }}
         insertafter: "#discovery.sendtargets.auth.username ="
         state: present
 
@@ -77,7 +77,7 @@
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^discovery.sendtargets.auth.password ="
-        line: discovery.sendtargets.auth.password = {{ pve__iscsi_authentication.password }}
+        line: discovery.sendtargets.auth.password = {{ pve_iscsi_authentication.password }}
         insertafter: "#discovery.sendtargets.auth.password ="
         state: present
 
@@ -85,19 +85,19 @@
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^discovery.sendtargets.auth.username_in"
-        line: discovery.sendtargets.auth.username_in = {{ pve__iscsi_authentication.username_in }}
+        line: discovery.sendtargets.auth.username_in = {{ pve_iscsi_authentication.username_in }}
         insertafter: "#discovery.sendtargets.auth.username_in"
         state: present
-      when: pve__iscsi_authentication.username_in is defined
+      when: pve_iscsi_authentication.username_in is defined
 
     - name: Configure iSCSI discovery initiator password
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^discovery.sendtargets.auth.password_in"
-        line: discovery.sendtargets.auth.password_in = {{ pve__iscsi_authentication.password_in }}
+        line: discovery.sendtargets.auth.password_in = {{ pve_iscsi_authentication.password_in }}
         insertafter: "#discovery.sendtargets.auth.password_in"
         state: present
-      when: pve__iscsi_authentication.password_in is defined
+      when: pve_iscsi_authentication.password_in is defined
 
     - name: Configure iSCSI session authentication
       ansible.builtin.lineinfile:
@@ -111,7 +111,7 @@
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^node.session.auth.username ="
-        line: node.session.auth.username = {{ pve__iscsi_authentication.username }}
+        line: node.session.auth.username = {{ pve_iscsi_authentication.username }}
         insertafter: "#node.session.auth.username ="
         state: present
 
@@ -119,7 +119,7 @@
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^node.session.auth.password ="
-        line: node.session.auth.password = {{ pve__iscsi_authentication.password }}
+        line: node.session.auth.password = {{ pve_iscsi_authentication.password }}
         insertafter: "#node.session.auth.password ="
         state: present
 
@@ -127,7 +127,7 @@
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^node.session.auth.username_in"
-        line: node.session.auth.username_in = {{ pve__iscsi_authentication.username_in }}
+        line: node.session.auth.username_in = {{ pve_iscsi_authentication.username_in }}
         insertafter: "#node.session.auth.username_in"
         state: present
 
@@ -135,7 +135,7 @@
       ansible.builtin.lineinfile:
         path: /etc/iscsi/iscsid.conf
         regexp: "^node.session.auth.password_in"
-        line: node.session.auth.password_in = {{ pve__iscsi_authentication.password_in }}
+        line: node.session.auth.password_in = {{ pve_iscsi_authentication.password_in }}
         insertafter: "#node.session.auth.password_in"
         state: present
   become: true
@@ -148,27 +148,27 @@
     --target {{ item.target }}
     --content {{ item.content | default("none") }}
     --nodes {{ item.nodes | default("all") }}
-  with_items: "{{ pve__iscsi_targets }}"
+  with_items: "{{ pve_iscsi_targets }}"
   become: true
-  when: pve__iscsi_targets is defined and item.name not in pve_storage_list.stdout
+  when: pve_iscsi_targets is defined and item.name not in pve__storage_status.stdout
 
 - name: Import ZFS pools
   ansible.builtin.command: /usr/sbin/zpool import {{ item.pool }} -f
-  with_items: "{{ pve__zfs_pools }}"
+  with_items: "{{ pve_zfs_pools }}"
   become: true
-  when: pve__zfs_pools is defined and item.name not in pve_storage_list.stdout
+  when: pve_zfs_pools is defined and item.name not in pve__storage_status.stdout
 
 - name: Add ZFS pools
   ansible.builtin.command: /usr/sbin/pvesm add zfspool {{ item.name }} -pool {{ item.pool }}
-  with_items: "{{ pve__zfs_pools }}"
+  with_items: "{{ pve_zfs_pools }}"
   become: true
-  when: pve__zfs_pools is defined and item.name not in pve_storage_list.stdout
+  when: pve_zfs_pools is defined and item.name not in pve__storage_status.stdout
 
 - name: Add LVM groups
   ansible.builtin.command: /usr/sbin/pvesm add lvm {{ item.name }}
     --vgname {{ item.vgname }}
     --content {{ item.content | default("images") }}
     --nodes {{ item.nodes | default("all") }}
-  with_items: "{{ pve__lvm_mounts }}"
+  with_items: "{{ pve_lvm_mounts }}"
   become: true
-  when: pve__lvm_mounts is defined and item.name not in pve_storage_list.stdout
+  when: pve_lvm_mounts is defined and item.name not in pve__storage_status.stdout
